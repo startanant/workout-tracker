@@ -5,3 +5,4 @@ An application built in Node.js, Express, and Mongodb to view create and track d
 
 ## Demo
 
+The application is deployed to [Heroku](https://workout-tracker202020.herokuapp.com/).
