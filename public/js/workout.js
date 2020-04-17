@@ -1,14 +1,13 @@
 async function initWorkout() {
   const lastWorkout = await API.getLastWorkout();
-  console.log("Last workout:", lastWorkout);
   if (lastWorkout) {
     document
       .querySelector("a[href='/exercise?']")
       .setAttribute("href", `/exercise?id=${lastWorkout._id}`);
-
+    
     const workoutSummary = {
-      date: formatDate(lastWorkout.day),
-      totalDuration: lastWorkout.totalDuration,
+      date: moment(lastWorkout.day).format('MMMM Do YYYY, h:mm:ss a'),
+      totalDuration: calcDuration(lastWorkout.exercises),
       numExercises: lastWorkout.exercises.length,
       ...tallyExercises(lastWorkout.exercises)
     };
@@ -19,12 +18,21 @@ async function initWorkout() {
   }
 }
 
+function calcDuration(exercises) {
+  let duration = 0;
+  exercises.forEach(exercise => {
+    duration += exercise.duration;
+  })
+
+  return duration;
+}
+
 function tallyExercises(exercises) {
   const tallied = exercises.reduce((acc, curr) => {
     if (curr.type === "resistance") {
       acc.totalWeight = (acc.totalWeight || 0) + curr.weight;
       acc.totalSets = (acc.totalSets || 0) + curr.sets;
-      acc.totalReps = (acc.totalReps || 0) + curr.reps;
+      acc.totalReps = (acc.totalReps || 0) + (curr.reps * curr.sets);
     } else if (curr.type === "cardio") {
       acc.totalDistance = (acc.totalDistance || 0) + curr.distance;
     }
@@ -41,7 +49,8 @@ function formatDate(date) {
     day: "numeric"
   };
 
-  return new Date(date).toLocaleDateString(options);
+  return moment.unix(date).format('MMMM Do YYYY, h:mm:ss a');
+  //return new Date(date).toLocaleDateString(options);
 }
 
 function renderWorkoutSummary(summary) {

@@ -21,8 +21,7 @@ async function initExercise() {
   let workout;
 
   if (location.search.split("=")[1] === undefined) {
-    workout = await API.createWorkout()
-    console.log(workout)
+    workout = await API.createWorkout({ day: moment() })
   }
   if (workout) {
     location.search = "?id=" + workout._id;
@@ -114,9 +113,15 @@ async function handleFormSubmit(event) {
     workoutData.duration = Number(resistanceDurationInput.value.trim());
   }
 
-  await API.addExercise(workoutData);
-  clearInputs();
-  toast.classList.add("success");
+  if (workoutData.name && workoutData.duration != 0){
+    await API.addExercise(workoutData);
+    clearInputs();
+    toast.classList.add("success");
+  }
+  else {
+    toast.classList.add("success");
+  }
+  
 }
 
 function handleToastAnimationEnd() {
